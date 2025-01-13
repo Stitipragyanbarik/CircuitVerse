@@ -28,7 +28,7 @@ class Users::CircuitverseController < ApplicationController
 
   def update
     if @profile.update(profile_params)
-      redirect_to user_projects_path(current_user)
+      render json: Api::V1::UserSerializer.new(@profile), status: :accepted
     else
       render :edit
     end

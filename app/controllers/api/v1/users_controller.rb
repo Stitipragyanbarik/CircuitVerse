@@ -27,8 +27,18 @@ class Api::V1::UsersController < Api::V1::BaseController
 
   # PATCH api/v1/users/:id
   def update
-    @user.update!(user_params)
-    if @user.update(user_params)
+    # Detach profile picture if `remove_picture` is true
+    if user_params[:remove_picture]
+      @user.profile_picture.purge
+    end
+
+    # Attach profile picture if provided
+    if user_params[:profile_picture].present?
+      @user.profile_picture.attach(user_params[:profile_picture])
+    end
+
+    # Update other user attributes
+    if @user.update(user_params.except(:profile_picture, :remove_picture))
       render json: Api::V1::UserSerializer.new(@user, @options), status: :accepted
     else
       invalid_resource!(@user.errors)
